@@ -10,7 +10,7 @@ import {AsyncStorage} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {LogBox} from 'react-native';
-import {ToastProvider} from 'react-native-toast-notifications';
+import Toast from 'react-native-toast-message';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -37,7 +37,7 @@ const App = () => {
   };
 
   return (
-    <ToastProvider offsetTop={100}>
+    <>
       <NavigationContainer>
         <ApplicationProvider {...eva} theme={eva.light}>
           {isLoggedIn ? (
@@ -72,7 +72,8 @@ const App = () => {
           )}
         </ApplicationProvider>
       </NavigationContainer>
-    </ToastProvider>
+      <Toast />
+    </>
   );
 };
 export default App;

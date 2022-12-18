@@ -65,7 +65,11 @@ export const updateItem = item =>
       .then(realm => {
         realm.write(() => {
           let oldItem = realm.objectForPrimaryKey(ITEMS_SCHEMA, item.id);
-          oldItem = item;
+          oldItem.done = item.done;
+          oldItem.title = item.title;
+          oldItem.deadline = item.deadline;
+          oldItem.repeating = item.repeating;
+          oldItem.location = item.location;
           resolve();
         });
       })

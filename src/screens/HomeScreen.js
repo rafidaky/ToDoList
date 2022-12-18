@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {Component} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   insertNewItem,
@@ -24,46 +24,84 @@ import {
   Datepicker,
 } from '@ui-kitten/components';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useToast} from 'react-native-toast-notifications';
+import Toast from 'react-native-toast-message';
 
-const HomeScreen = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [newItem, setNewItem] = useState({
-    id: 0,
-    creationDate: null,
-    done: false,
-    title: '',
-    location: '',
-    deadline: null,
-    repeating: false,
-  });
+class HomeScreen extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      modalOpen: false,
+      id: 0,
+      creationDate: null,
+      done: false,
+      title: '',
+      location: '',
+      deadline: new Date(),
+      repeating: false,
+      items: [],
+    };
+  }
 
-  const [items, setItems] = useState([]);
-  const toast = useToast();
-
-  const addNewItem = async () => {
-    await setNewItem({
-      ...newItem,
-      creationDate: new Date(),
-      id: Date.now(),
-    });
+  addNewItem = () => {
+    this.setState(
+      {
+        creationDate: new Date(),
+        id: Date.now(),
+      },
+      () => {
+        const newItem = {
+          id: this.state.id,
+          creationDate: this.state.creationDate,
+          done: this.state.done,
+          title: this.state.title,
+          location: this.state.location,
+          deadline: this.state.deadline,
+          repeating: this.state.repeating,
+        };
+        insertNewItem(newItem);
+        this.setState({
+          modalOpen: false,
+          id: 0,
+          creationDate: new Date(),
+          done: false,
+          title: '',
+          location: '',
+          deadline: new Date(),
+          repeating: false,
+        });
+        Toast.show({
+          type: 'success',
+          text1: 'Başarı',
+          text2: 'Madde Eklendi',
+        });
+      },
+    );
   };
 
-  const getAllItems = async () => {
+  getAllItems = async () => {
     const items = await queryAllItems();
-    setItems(items);
+    this.setState({items});
   };
 
-  useEffect(() => {
-    if (newItem.id !== 0 && newItem.creationDate !== null) {
-      insertNewItem(newItem);
-      setModalOpen(false);
-      toast.show('Madde Eklendi', {
+  updateListItem = async () => {
+    try {
+      const item = {
+        id: this.state.id,
+        creationDate: this.state.creationDate,
+        done: this.state.done,
+        title: this.state.title,
+        location: this.state.location,
+        deadline: this.state.deadline,
+        repeating: this.state.repeating,
+      };
+      await updateItem(item);
+      Toast.show({
         type: 'success',
-        placement: 'top',
-        animationType: 'slide-in',
+        text1: 'Başarı',
+        text2: 'Madde Güncellendi',
       });
-      setNewItem({
+      this.setState({
+        modalOpen: false,
         id: 0,
         creationDate: new Date(),
         done: false,
@@ -72,24 +110,56 @@ const HomeScreen = () => {
         deadline: new Date(),
         repeating: false,
       });
+      this.getAllItems();
+    } catch (error) {
+      console.error(error);
     }
-  }, [newItem]);
-
-  const deleteListItem = async id => {
-    await deleteItem(id);
-    toast.show('Madde Silindi', {
-      type: 'danger',
-      placement: 'top',
-      animationType: 'slide-in',
+  };
+  async finishItem(item, check) {
+    const updatedItem = {
+      id: item.id,
+      creationDate: item.creationDate,
+      done: check,
+      title: item.title,
+      location: item.location,
+      deadline: item.deadline,
+      repeating: item.repeating,
+    };
+    await updateItem(updatedItem);
+    if (check) {
+      Toast.show({
+        type: 'success',
+        text1: 'Başarı',
+        text2: 'Madde Tamamlandı!',
+      });
+    }
+    this.setState({
+      modalOpen: false,
+      id: 0,
+      creationDate: new Date(),
+      done: false,
+      title: '',
+      location: '',
+      deadline: new Date(),
+      repeating: false,
     });
-    getAllItems();
+    this.getAllItems();
+  }
+  deleteListItem = async id => {
+    await deleteItem(id);
+    this.getAllItems();
+    Toast.show({
+      type: 'success',
+      text1: 'Başarı',
+      text2: 'Madde Silindi',
+    });
   };
 
-  useEffect(() => {
-    getAllItems();
-  }, []);
+  componentDidMount() {
+    this.getAllItems();
+  }
 
-  const showDeleteAlert = id => {
+  showDeleteAlert = id => {
     Alert.alert(
       'Dikkat!',
       'Maddeyi silmek istediğinize emin misiniz?',
@@ -100,34 +170,52 @@ const HomeScreen = () => {
         },
         {
           text: 'Evet',
-          onPress: () => deleteListItem(id),
+          onPress: () => this.deleteListItem(id),
         },
       ],
       {cancelable: false},
     );
   };
 
-  const Item = item => {
+  renderItem(item) {
     return (
-      <View style={styles.itemContainer}>
+      <View style={[styles.itemContainer, {opacity: item.done ? 0.2 : 1}]}>
         <View style={[styles.itemTopRow, {justifyContent: 'space-between'}]}>
           <View style={[styles.itemTopRow, {alignItems: 'center'}]}>
             <CheckBox
               checked={item.done}
-              onChange={nextChecked => {}}></CheckBox>
-            <Text style={styles.title}>{item.item.title}</Text>
+              onChange={nextChecked => {
+                this.finishItem(item, nextChecked);
+              }}></CheckBox>
+            <Text style={styles.title}>{item.title}</Text>
           </View>
           <View style={styles.itemTopRow}>
             <TouchableOpacity
+              disabled={item.done}
               onPress={() => {
-                setModalOpen(true);
+                this.setState(
+                  {
+                    id: item.id,
+                    creationDate: item.creationDate,
+                    done: item.done,
+                    title: item.title,
+                    location: item.location,
+                    deadline: item.deadline,
+                    repeating: item.repeating,
+                  },
+
+                  () => {
+                    this.setState({modalOpen: true});
+                  },
+                );
               }}>
               <Ionicons name="pencil" size={25} color="tomato" />
             </TouchableOpacity>
             <TouchableOpacity
+              disabled={item.done}
               style={{marginLeft: 10}}
               onPress={() => {
-                showDeleteAlert(item.item.id);
+                this.showDeleteAlert(item.id);
               }}>
               <Ionicons name="trash" size={25} color="tomato" />
             </TouchableOpacity>
@@ -135,81 +223,107 @@ const HomeScreen = () => {
         </View>
         <View style={styles.itemTopRow}>
           <Text style={styles.title}>
-            Bitiş Tarihi: {new Date(item.item.deadline).toLocaleDateString()}
+            Bitiş Tarihi: {new Date(item.deadline).toLocaleDateString()}
           </Text>
-          <Text style={styles.title}>Konum: {item.item.location}</Text>
+          <Text style={styles.title}>Konum: {item.location}</Text>
         </View>
       </View>
     );
-  };
+  }
 
-  return (
-    <ImageBackground
-      style={styles.background}
-      source={require('../../assets/images/backgroundPattern.png')}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.text} category="h5">
-            Bugün Neler Yapılacak?
-          </Text>
-          <TouchableOpacity
-            onPress={() => {
-              setModalOpen(true);
-            }}>
-            <Ionicons name="add-circle" size={30} color="tomato" />
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={items}
-          renderItem={({item}) => <Item item={item} />}
-          keyExtractor={item => item.id}
-        />
-      </SafeAreaView>
-      <Modal visible={modalOpen}>
-        <View style={styles.modal}>
-          <Text style={styles.text} category="h4">
-            Yeni Madde Ekle
-          </Text>
-          <Input
-            placeholder="Başlık"
-            value={newItem.title}
-            onChangeText={nextValue =>
-              setNewItem({...newItem, title: nextValue})
-            }
+  render() {
+    return (
+      <ImageBackground
+        style={styles.background}
+        source={require('../../assets/images/backgroundPattern.png')}>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.text} category="h5">
+              Bugün Neler Yapılacak?
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                this.setState({modalOpen: true});
+              }}>
+              <Ionicons name="add-circle" size={30} color="tomato" />
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={this.state.items}
+            renderItem={({item}) => this.renderItem(item)}
+            keyExtractor={item => item.id}
           />
-          <Input
-            placeholder="Nerede Yapılacak?"
-            value={newItem.location}
-            onChangeText={nextValue =>
-              setNewItem({...newItem, location: nextValue})
-            }
-          />
-          <CheckBox
-            checked={newItem.repeating}
-            onChange={nextChecked =>
-              setNewItem({...newItem, repeating: nextChecked})
-            }>
-            {`Tekrar ediyor mu?`}
-          </CheckBox>
-          <Datepicker
-            style={{width: '100%'}}
-            label="Bitiş Tarihi"
-            date={newItem.deadline}
-            onSelect={nextDate => setNewItem({...newItem, deadline: nextDate})}
-          />
-          <Button
-            onPress={() => {
-              addNewItem();
-            }}
-            style={styles.button}
-            disabled={newItem.title != '' ? false : true}>
-            Ekle
-          </Button>
-        </View>
-      </Modal>
-    </ImageBackground>
-  );
-};
+        </SafeAreaView>
+        <Modal
+          backdropStyle={{backgroundColor: 'rgba(0, 0, 0, 0.8)'}}
+          onBackdropPress={() => {
+            this.setState({
+              modalOpen: false,
+              id: 0,
+              creationDate: new Date(),
+              done: false,
+              title: '',
+              location: '',
+              deadline: new Date(),
+              repeating: false,
+            });
+          }}
+          visible={this.state.modalOpen}>
+          <View style={styles.modal}>
+            <Text style={styles.text} category="h4">
+              {this.state.id !== 0 ? 'Maddeyi Güncelle' : 'Yeni Madde Ekle'}
+            </Text>
+            <Input
+              placeholder="Başlık"
+              value={this.state.title}
+              onChangeText={nextValue =>
+                this.setState({
+                  title: nextValue,
+                })
+              }
+            />
+            <Input
+              placeholder="Nerede Yapılacak?"
+              value={this.state.location}
+              onChangeText={nextValue =>
+                this.setState({
+                  location: nextValue,
+                })
+              }
+            />
+            <CheckBox
+              checked={this.state.repeating}
+              onChange={nextChecked =>
+                this.setState({
+                  repeating: nextChecked,
+                })
+              }>
+              {`Tekrar ediyor mu?`}
+            </CheckBox>
+            <Datepicker
+              style={{width: '100%'}}
+              label="Bitiş Tarihi"
+              date={this.state.deadline}
+              onSelect={nextDate =>
+                this.setState({
+                  deadline: nextDate,
+                })
+              }
+            />
+            <Button
+              onPress={() => {
+                this.state.id !== 0 ? this.updateListItem() : this.addNewItem();
+              }}
+              style={styles.button}
+              disabled={this.state.title != '' ? false : true}>
+              {this.state.id !== 0 ? 'Güncelle' : 'Ekle'}
+            </Button>
+          </View>
+        </Modal>
+      </ImageBackground>
+    );
+  }
+}
 
 export default HomeScreen;
 
