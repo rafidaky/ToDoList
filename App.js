@@ -18,7 +18,7 @@ const Tab = createBottomTabNavigator();
 const App = () => {
   LogBox.ignoreAllLogs();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  console.disableYellowBox = true;
+
   useEffect(() => {
     getToken();
   }, []);
@@ -67,7 +67,7 @@ const App = () => {
             </Tab.Navigator>
           ) : (
             <Stack.Navigator initialRouteName="LoginScreen">
-              <Stack.Screen name="LoginScreen" component={LoginScreen} />
+              <Stack.Screen name="Giriş" component={LoginScreen} />
             </Stack.Navigator>
           )}
         </ApplicationProvider>

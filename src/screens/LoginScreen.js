@@ -10,6 +10,8 @@ const LoginScreen = () => {
   const saveToken = async token => {
     try {
       await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('email', email);
+      await AsyncStorage.setItem('password', password);
     } catch (error) {
       console.error(error);
     }
@@ -26,13 +28,21 @@ const LoginScreen = () => {
       style={styles.background}
       source={require('../../assets/images/backgroundPattern.png')}>
       <Input
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete={false}
         placeholder="E-Mail"
         value={email}
+        style={styles.input}
         onChangeText={nextValue => setEmail(nextValue)}
       />
       <Input
         placeholder="Şifre"
+        autoCapitalize="none"
         value={password}
+        autoCorrect={false}
+        secureTextEntry
+        style={styles.input}
         onChangeText={nextValue => setPassword(nextValue)}
       />
       <Button
@@ -55,5 +65,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 33,
+  },
+  input: {
+    marginTop: 15,
+  },
+  button: {
+    marginTop: 30,
   },
 });
