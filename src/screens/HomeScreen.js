@@ -9,7 +9,12 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {insertNewItem, queryAllItems, deleteItem} from '../database/allSchemas';
+import {
+  insertNewItem,
+  queryAllItems,
+  deleteItem,
+  updateItem,
+} from '../database/allSchemas';
 import {
   Button,
   CheckBox,
@@ -25,11 +30,11 @@ const HomeScreen = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [newItem, setNewItem] = useState({
     id: 0,
-    creationDate: new Date(),
+    creationDate: null,
     done: false,
     title: '',
     location: '',
-    deadline: new Date(),
+    deadline: null,
     repeating: false,
   });
 
@@ -42,19 +47,33 @@ const HomeScreen = () => {
       creationDate: new Date(),
       id: Date.now(),
     });
-    await insertNewItem(newItem);
-    await setModalOpen(false);
-    toast.show('Madde Eklendi', {
-      type: 'success',
-      placement: 'top',
-      animationType: 'slide-in',
-    });
   };
 
   const getAllItems = async () => {
     const items = await queryAllItems();
     setItems(items);
   };
+
+  useEffect(() => {
+    if (newItem.id !== 0 && newItem.creationDate !== null) {
+      insertNewItem(newItem);
+      setModalOpen(false);
+      toast.show('Madde Eklendi', {
+        type: 'success',
+        placement: 'top',
+        animationType: 'slide-in',
+      });
+      setNewItem({
+        id: 0,
+        creationDate: new Date(),
+        done: false,
+        title: '',
+        location: '',
+        deadline: new Date(),
+        repeating: false,
+      });
+    }
+  }, [newItem]);
 
   const deleteListItem = async id => {
     await deleteItem(id);
@@ -89,7 +108,6 @@ const HomeScreen = () => {
   };
 
   const Item = item => {
-    console.log('item', item.item);
     return (
       <View style={styles.itemContainer}>
         <View style={[styles.itemTopRow, {justifyContent: 'space-between'}]}>

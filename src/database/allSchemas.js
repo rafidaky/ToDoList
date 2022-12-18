@@ -59,4 +59,30 @@ export const deleteItem = itemId =>
       .catch(error => reject('deleting error: ', error));
   });
 
+export const updateItem = item =>
+  new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+      .then(realm => {
+        realm.write(() => {
+          let oldItem = realm.objectForPrimaryKey(ITEMS_SCHEMA, item.id);
+          oldItem = item;
+          resolve();
+        });
+      })
+      .catch(error => reject(error));
+  });
+
+export const deleteAllItems = () =>
+  new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+      .then(realm => {
+        realm.write(() => {
+          let allItems = realm.objects(ITEMS_SCHEMA);
+          realm.delete(allItems);
+          resolve();
+        });
+      })
+      .catch(error => reject(error));
+  });
+
 export default new Realm(databaseOptions);
