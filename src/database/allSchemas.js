@@ -46,4 +46,17 @@ export const queryAllItems = () =>
       .catch(error => reject(error));
   });
 
+export const deleteItem = itemId =>
+  new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+      .then(realm => {
+        realm.write(() => {
+          let deletingItem = realm.objectForPrimaryKey(ITEMS_SCHEMA, itemId);
+          realm.delete(deletingItem);
+          resolve('deleted');
+        });
+      })
+      .catch(error => reject('deleting error: ', error));
+  });
+
 export default new Realm(databaseOptions);

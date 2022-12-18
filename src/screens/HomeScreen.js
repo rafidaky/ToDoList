@@ -1,4 +1,5 @@
 import {
+  Alert,
   Dimensions,
   FlatList,
   ImageBackground,
@@ -8,7 +9,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {insertNewItem, queryAllItems} from '../database/allSchemas';
+import {insertNewItem, queryAllItems, deleteItem} from '../database/allSchemas';
 import {
   Button,
   CheckBox,
@@ -18,6 +19,7 @@ import {
   Datepicker,
 } from '@ui-kitten/components';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {useToast} from 'react-native-toast-notifications';
 
 const HomeScreen = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -32,6 +34,7 @@ const HomeScreen = () => {
   });
 
   const [items, setItems] = useState([]);
+  const toast = useToast();
 
   const addNewItem = async () => {
     await setNewItem({
@@ -40,6 +43,12 @@ const HomeScreen = () => {
       id: Date.now(),
     });
     await insertNewItem(newItem);
+    await setModalOpen(false);
+    toast.show('Madde Eklendi', {
+      type: 'success',
+      placement: 'top',
+      animationType: 'slide-in',
+    });
   };
 
   const getAllItems = async () => {
@@ -47,16 +56,71 @@ const HomeScreen = () => {
     setItems(items);
   };
 
+  const deleteListItem = async id => {
+    await deleteItem(id);
+    toast.show('Madde Silindi', {
+      type: 'danger',
+      placement: 'top',
+      animationType: 'slide-in',
+    });
+    getAllItems();
+  };
+
   useEffect(() => {
     getAllItems();
   }, []);
+
+  const showDeleteAlert = id => {
+    Alert.alert(
+      'Dikkat!',
+      'Maddeyi silmek istediğinize emin misiniz?',
+      [
+        {
+          text: 'Hayır',
+          onPress: () => console.log('Option 2 pressed'),
+        },
+        {
+          text: 'Evet',
+          onPress: () => deleteListItem(id),
+        },
+      ],
+      {cancelable: false},
+    );
+  };
 
   const Item = item => {
     console.log('item', item.item);
     return (
       <View style={styles.itemContainer}>
-        <CheckBox checked={item.done} onChange={nextChecked => {}}></CheckBox>
-        <Text style={styles.title}>{item.item.title}</Text>
+        <View style={[styles.itemTopRow, {justifyContent: 'space-between'}]}>
+          <View style={[styles.itemTopRow, {alignItems: 'center'}]}>
+            <CheckBox
+              checked={item.done}
+              onChange={nextChecked => {}}></CheckBox>
+            <Text style={styles.title}>{item.item.title}</Text>
+          </View>
+          <View style={styles.itemTopRow}>
+            <TouchableOpacity
+              onPress={() => {
+                setModalOpen(true);
+              }}>
+              <Ionicons name="pencil" size={25} color="tomato" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{marginLeft: 10}}
+              onPress={() => {
+                showDeleteAlert(item.item.id);
+              }}>
+              <Ionicons name="trash" size={25} color="tomato" />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.itemTopRow}>
+          <Text style={styles.title}>
+            Bitiş Tarihi: {new Date(item.item.deadline).toLocaleDateString()}
+          </Text>
+          <Text style={styles.title}>Konum: {item.item.location}</Text>
+        </View>
       </View>
     );
   };
@@ -73,7 +137,6 @@ const HomeScreen = () => {
           <TouchableOpacity
             onPress={() => {
               setModalOpen(true);
-              addNewItem();
             }}>
             <Ionicons name="add-circle" size={30} color="tomato" />
           </TouchableOpacity>
@@ -159,11 +222,18 @@ const styles = StyleSheet.create({
   itemContainer: {
     marginTop: 10,
     width: Dimensions.get('screen').width - 33,
+    height: Dimensions.get('screen').height / 8,
     alignSelf: 'center',
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
     borderColor: 'lightgrey',
+    justifyContent: 'space-around',
+  },
+  itemTopRow: {
     flexDirection: 'row',
+  },
+  title: {
+    marginLeft: 10,
   },
 });
