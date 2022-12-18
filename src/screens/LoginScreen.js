@@ -23,12 +23,7 @@ const LoginScreen = () => {
 
   return (
     <ImageBackground
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 33,
-      }}
+      style={styles.background}
       source={require('../../assets/images/backgroundPattern.png')}>
       <Input
         placeholder="E-Mail"
@@ -54,4 +49,11 @@ const LoginScreen = () => {
 
 export default LoginScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 33,
+  },
+});

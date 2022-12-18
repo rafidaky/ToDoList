@@ -5,13 +5,19 @@ import * as eva from '@eva-design/eva';
 import {ApplicationProvider} from '@ui-kitten/components';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import MyAccountScreen from './src/screens/MyAccountScreen';
 import {AsyncStorage} from 'react-native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {LogBox} from 'react-native';
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 const App = () => {
+  LogBox.ignoreAllLogs();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  console.disableYellowBox = true;
   useEffect(() => {
     getToken();
   }, []);
@@ -33,9 +39,30 @@ const App = () => {
     <NavigationContainer>
       <ApplicationProvider {...eva} theme={eva.light}>
         {isLoggedIn ? (
-          <Stack.Navigator initialRouteName="Home">
-            <Stack.Screen name="HomeScreen" component={HomeScreen} />
-          </Stack.Navigator>
+          <Tab.Navigator
+            screenOptions={({route}) => ({
+              tabBarIcon: ({focused, color, size}) => {
+                let iconName;
+
+                if (route.name === 'Anasayfa') {
+                  iconName = focused ? 'home' : 'home-outline';
+                } else if (route.name === 'Hesabım') {
+                  iconName = focused ? 'person' : 'person-outline';
+                }
+                return <Ionicons name={iconName} size={size} color={color} />;
+              },
+              tabBarActiveTintColor: 'tomato',
+              tabBarInactiveTintColor: 'gray',
+            })}>
+            <Tab.Screen
+              options={{
+                headerShown: false,
+              }}
+              name="Anasayfa"
+              component={HomeScreen}
+            />
+            <Tab.Screen name="Hesabım" component={MyAccountScreen} />
+          </Tab.Navigator>
         ) : (
           <Stack.Navigator initialRouteName="LoginScreen">
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
@@ -45,5 +72,4 @@ const App = () => {
     </NavigationContainer>
   );
 };
-
 export default App;
