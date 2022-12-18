@@ -2,16 +2,20 @@ import {ImageBackground, StyleSheet} from 'react-native';
 import React, {useState} from 'react';
 import {Button, Input} from '@ui-kitten/components';
 import {AsyncStorage} from 'react-native';
+import {login} from '../actions';
+import {useDispatch} from 'react-redux';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
 
   const saveToken = async token => {
     try {
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('email', email);
       await AsyncStorage.setItem('password', password);
+      dispatch(login());
     } catch (error) {
       console.error(error);
     }

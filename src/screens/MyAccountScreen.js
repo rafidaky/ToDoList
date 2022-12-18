@@ -3,10 +3,13 @@ import React, {useEffect, useState} from 'react';
 import {Input, Button} from '@ui-kitten/components';
 import {AsyncStorage} from 'react-native';
 import {deleteAllItems} from '../database/allSchemas';
+import {useDispatch} from 'react-redux';
+import {logout} from '../actions';
 
 const MyAccountScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
 
   const getCredentials = async () => {
     try {
@@ -23,12 +26,13 @@ const MyAccountScreen = () => {
     getCredentials();
   }, []);
 
-  const logOut = async () => {
+  const logOutFunction = async () => {
     try {
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('email');
       await AsyncStorage.removeItem('password');
       deleteAllItems();
+      dispatch(logout());
     } catch (error) {
       console.error(error);
     }
@@ -58,7 +62,7 @@ const MyAccountScreen = () => {
       />
       <Button
         onPress={() => {
-          logOut();
+          logOutFunction();
         }}
         style={styles.button}>
         Çıkış Yap
