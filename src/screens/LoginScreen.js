@@ -77,11 +77,9 @@ const LoginScreen = () => {
       });
   };
   const loginToFirebase = () => {
-    console.log('login func');
     auth()
       .signInWithEmailAndPassword(email, password)
-      .then(val => {
-        console.log('val', val);
+      .then(() => {
         auth()
           .currentUser.getIdTokenResult()
           .then(val => {
@@ -115,6 +113,13 @@ const LoginScreen = () => {
             type: 'error',
             text1: 'Hata',
             text2: 'Böyle bir kullanıcı bulunamadı.',
+          });
+        }
+        if (error.code === 'auth/invalid-email') {
+          Toast.show({
+            type: 'error',
+            text1: 'Hata',
+            text2: 'Lütfen geçerli bir e-mail adresi girin.',
           });
         } else {
           Toast.show({
