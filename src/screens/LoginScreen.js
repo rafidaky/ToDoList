@@ -109,6 +109,13 @@ const LoginScreen = () => {
             text1: 'Hata',
             text2: 'İnternet bağlantınız yok!',
           });
+        }
+        if (error.code === 'auth/user-not-found') {
+          Toast.show({
+            type: 'error',
+            text1: 'Hata',
+            text2: 'Böyle bir kullanıcı bulunamadı.',
+          });
         } else {
           Toast.show({
             type: 'error',

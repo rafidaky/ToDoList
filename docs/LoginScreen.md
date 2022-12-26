@@ -1,0 +1,8 @@
+
+Merhaba! Bu sayfa bir "login" ekranı için bir React Native uygulamasında kullanılmak üzere yazılmış bir kod parçacığıdır. Bu kod parçacığı, kullanıcının uygulamaya giriş yapmak için bir e-posta ve şifre girdiği bir ekranı içerir.
+
+Başlangıç olarak, kullanıcıdan e-posta ve şifre girdilerini almak için 'Input' ve 'Text' komponentleri kullanılmıştır. Daha sonra, kullanıcının giriş yapmak için 'loginToFirebase' fonksiyonunu çağırdığı bir 'Button' komponenti eklenmiştir. Bu fonksiyon, Firebase kütüphanesi kullanılarak kullanıcının girdiği e-posta ve şifreyi kontrol eder ve doğruysa uygulamaya giriş yapmasını sağlar. Ayrıca, kullanıcının e-posta ve şifresini AsyncStorage kullanarak saklar ve 'login' eylemi için bir 'dispatch' çağırır.
+
+Eğer kullanıcının girdiği e-posta ve şifre yanlışsa, 'loginToFirebase' fonksiyonu bir hata döndürür ve bu hatayı 'Toast' komponenti kullanarak kullanıcıya bildirir. Ayrıca, eğer kullanıcı daha önceden kaydolmamışsa, 'register' fonksiyonu çağırılarak kullanıcının kaydolması ve giriş yapması sağlanır. Bu fonksiyon da aynı şekilde Firebase kütüphanesi kullanılarak çalışır ve kullanıcının kaydolması sırasında ortaya çıkabilecek hataları 'Toast' komponenti ile bildirir.
+
+Bu kod parçacığında ayrıca, 'ImageBackground', 'StyleSheet', 'TouchableOpacity', 'Ionicons' gibi diğer React Native komponentleri de kullanılmıştır. Bu komponentler, ekranın arka planını değiştirme, stil oluşturma, dokunmatik olayları takip etme ve simge kullanma gibi işlemleri yapmak için kullanılır.
