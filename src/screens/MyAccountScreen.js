@@ -5,6 +5,7 @@ import {AsyncStorage} from 'react-native';
 import {deleteAllItems} from '../database/allSchemas';
 import {useDispatch} from 'react-redux';
 import {logout} from '../actions';
+import auth from '@react-native-firebase/auth';
 
 const MyAccountScreen = () => {
   const [email, setEmail] = useState('');
@@ -28,11 +29,16 @@ const MyAccountScreen = () => {
 
   const logOutFunction = async () => {
     try {
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('email');
-      await AsyncStorage.removeItem('password');
-      deleteAllItems();
-      dispatch(logout());
+      auth()
+        .signOut()
+        .then(() => {
+          AsyncStorage.removeItem('token');
+          AsyncStorage.removeItem('email');
+          AsyncStorage.removeItem('password');
+          deleteAllItems();
+          dispatch(logout());
+          console.log('User signed out!');
+        });
     } catch (error) {
       console.error(error);
     }
