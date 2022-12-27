@@ -94,38 +94,40 @@ const LoginScreen = () => {
           });
       })
       .catch(error => {
-        console.log(error);
-        if (error.code === 'auth/wrong-password') {
+        console.log(error.code);
+        if (error.code == 'auth/wrong-password') {
           Toast.show({
             type: 'error',
             text1: 'Hata',
             text2: 'Yanlış Şifre!',
           });
-        } else if (error.code === 'auth/network-request-failed') {
+        }
+        if (error.code == 'auth/network-request-failed') {
           Toast.show({
             type: 'error',
             text1: 'Hata',
             text2: 'İnternet bağlantınız yok!',
           });
         }
-        if (error.code === 'auth/user-not-found') {
+        if (error.code == 'auth/user-not-found') {
           Toast.show({
             type: 'error',
             text1: 'Hata',
             text2: 'Böyle bir kullanıcı bulunamadı.',
           });
         }
-        if (error.code === 'auth/invalid-email') {
+        if (error.code == 'auth/invalid-email') {
           Toast.show({
             type: 'error',
             text1: 'Hata',
             text2: 'Lütfen geçerli bir e-mail adresi girin.',
           });
-        } else {
+        }
+        if (error.code == 'auth/network-request-failed') {
           Toast.show({
             type: 'error',
             text1: 'Hata',
-            text2: 'Bir hata oluştu.',
+            text2: 'İnternet bağlantınız yok!',
           });
         }
       });
@@ -188,7 +190,6 @@ const LoginScreen = () => {
           <Button
             onPress={() => {
               if (pageState === 'login') {
-                console.log('here');
                 loginToFirebase();
               } else if (pageState === 'register') {
                 register();

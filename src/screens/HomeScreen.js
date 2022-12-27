@@ -74,6 +74,7 @@ class HomeScreen extends Component {
           text1: 'Başarı',
           text2: 'Madde Eklendi',
         });
+        this.getAllItems();
       },
     );
   };
